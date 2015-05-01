@@ -11,11 +11,6 @@
 <style>
 
 
-
-rect:hover {
-  fill: orange;
-}
-
 #tooltip {
   position: absolute;
   width: 200px;
@@ -81,7 +76,6 @@ body {
         <p><strong>Description</strong></p>
         <p><span id="value">description</span></p>
 </div>
-
 
 <body>
 <script src="http://d3js.org/d3.v3.js"></script>
@@ -152,7 +146,7 @@ var div = d3.select("text").append("div")
     .style("opacity", 0);
 
 // Get the data
-d3.tsv("survival_hazard_df.tsv", function(error, data) {
+d3.tsv("survival_hazard.tsv", function(error, data) {
   data.forEach(function(d) {
     d.desc = d.desc;
     d.period = (d.period-1)*5.5;
@@ -227,10 +221,12 @@ d3.tsv("survival_hazard_df.tsv", function(error, data) {
                 .style("opacity", newOpacity);
               d3.select(this)
                 .style("font-size", function() {
-                  if (active) {return 25}
+                  if (active) {return "25px"}
                 })
               // Update whether or not the elements are active
+              console.log(active)
               d.active = active
+              console.log(active)
            })
           .on("mouseover", function(){
               if (d.active != true) {
@@ -242,7 +238,7 @@ d3.tsv("survival_hazard_df.tsv", function(error, data) {
                   .transition()
                   .duration(50)
                   .style("font-size", function() {
-                    if (d.active != true) {return 25} 
+                    if (d.active != true) {return "25px"} 
                   })
                   ;
               }
@@ -252,7 +248,7 @@ d3.tsv("survival_hazard_df.tsv", function(error, data) {
           //Update the tooltip position and value
           d3.select("#tooltip")
             .style("left", xPosition + "px")
-            .style("top", yPosition + "px")
+            .style("top", yPosition - 30 + "px")
             .select("#value")
 
             .text( desc ) ;
@@ -271,7 +267,7 @@ d3.tsv("survival_hazard_df.tsv", function(error, data) {
                   .transition()
                   .duration(2500)
                   .style("font-size", function() {
-                    return 16
+                    return "16px"
                   }
                   )}
           //Hide the tooltip
@@ -291,6 +287,7 @@ d3.tsv("survival_hazard_df.tsv", function(error, data) {
     .append("text")
       .attr("transform",
             "translate(" + (width/2) + ")")
+      .attr("y", -5) 
       .style("text-anchor", "middle")
       .text("Evaluation Year");
 
@@ -312,6 +309,7 @@ d3.tsv("survival_hazard_df.tsv", function(error, data) {
     .append("text")
       .attr("transform",
             "translate(" + (width/2) + ")")
+      .attr("y", -5)
       .style("text-anchor", "middle")
       .text("Evaluation Year");
 
