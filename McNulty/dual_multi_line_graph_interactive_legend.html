@@ -82,14 +82,9 @@ body {
         <p><span id="value">description</span></p>
 </div>
 
-<!-- <div id="viz"></div> -->
-
 
 <body>
 <script src="http://d3js.org/d3.v3.js"></script>
-<!-- <script src="http://www.d3plus.org/js/d3.js"></script>
-<script src="http://www.d3plus.org/js/d3plus.js"></script>
- -->
 <script>
 
 var margin = {top: 20, right: 80, bottom: 80, left: 50},
@@ -101,8 +96,6 @@ var x = d3.scale.linear()
 var y = d3.scale.linear()
     .range([height, 0]);
 var y2 = d3.scale.linear()
-    // .base(Math.E)
-    // .domain([Math.exp(0), Math.exp(9)])
     .range([height, 0]);
 
 var color = d3.scale.category10();
@@ -159,9 +152,7 @@ var div = d3.select("text").append("div")
     .style("opacity", 0);
 
 // Get the data
-// d3.tsv("test_df.tsv", function(error, data) {
 d3.tsv("survival_hazard_df.tsv", function(error, data) {
-// d3.tsv("survival_log_hazard_df.tsv", function(error, data) {
   data.forEach(function(d) {
     d.desc = d.desc;
     d.period = (d.period-1)*5.5;
