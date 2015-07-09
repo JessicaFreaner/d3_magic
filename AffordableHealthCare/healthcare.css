@@ -1,0 +1,84 @@
+/*
+
+Copyright vida.io 2013
+License: BSD
+d3js is from Mike Bostock
+
+*/
+
+/* stylesheet for your custom graph */
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+.states {
+  fill: #aaa;
+}
+
+.states .active {
+  fill: orange;
+}
+
+#state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+#canvas {
+  position: relative;
+}
+
+#state-select {
+  position: absolute;
+  top: 320px;
+  left: 150px;
+}
+
+#twenty-seven {
+  position: absolute;
+  top: 50px;
+  left: 460px;
+  text-align: center;
+}
+
+#twenty-seven > h1 {
+  color: steelblue;
+}
+
+#twenty-seven-25k {
+  position: absolute;
+  top: 50px;
+  left: 620px;
+  text-align: center;
+}
+
+#twenty-seven-25k > h1 {
+  color: #E35B5E;
+}
+
+#family-four-50k {
+  position: absolute;
+  top: 50px;
+  left: 780px;
+  text-align: center;
+}
+
+#family-four-50k > h1 {
+  color: #E3DF40;
+}
+
+span.no-data {
+  font-size: 30px;
+}
+
+#state-marketplace {
+  position: absolute;
+  top: 280px;
+  left: 520px;
+}
