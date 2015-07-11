@@ -5,8 +5,27 @@ License: BSD
 d3js is from Mike Bostock
 
 */
+body {
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  width: 1100px;
+  height: 500px;
+  position: relative;
+  margin-left: 20px;
+}
 
 /* stylesheet for your custom graph */
+
+a{
+  text-decoration: none;
+  color: steelblue;
+}
+
+h1{
+  color: #34495e;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+
+}
 
 .background {
   fill: none;
@@ -30,47 +49,53 @@ d3js is from Mike Bostock
   pointer-events: none;
 }
 
-#canvas {
+#canvas-svg {
   position: relative;
+  margin-top: 50px;
 }
 
 #state-select {
   position: absolute;
   top: 320px;
   left: 150px;
+  margin-top: 10px;
+
 }
 
 #twenty-seven {
   position: absolute;
-  top: 50px;
+  top: 0px;
   left: 460px;
   text-align: center;
 }
 
 #twenty-seven > h1 {
   color: steelblue;
+  font-weight: 100;
 }
 
 #twenty-seven-25k {
   position: absolute;
-  top: 50px;
+  top: 0px;
   left: 620px;
   text-align: center;
 }
 
 #twenty-seven-25k > h1 {
   color: #E35B5E;
+  font-weight: 100;
 }
 
 #family-four-50k {
   position: absolute;
-  top: 50px;
+  top: 0px;
   left: 780px;
   text-align: center;
 }
 
 #family-four-50k > h1 {
   color: #E3DF40;
+  font-weight: 100;
 }
 
 span.no-data {
@@ -79,6 +104,6 @@ span.no-data {
 
 #state-marketplace {
   position: absolute;
-  top: 280px;
+  top: 250px;
   left: 520px;
 }
