@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+// 
+>>>>>>> 2c1902d16ba096d60920f7ee02e3843627f1bff6
 /*--- IMPORTANT GUIDELINES --- 
 1. Use div #canvas-svg for svg rendering
     var svg = d3.select("#canvas-svg");
