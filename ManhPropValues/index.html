@@ -1,0 +1,330 @@
+<!-- topojson \
+  -o pv_by_zip.json \
+  --id-property zipCode \
+  -- \
+  manh_pv_2015_Q2.json \
+  response.json -->
+
+
+<!DOCTYPE html>
+<head>
+  	<title>Example</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+ 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="http://rawgithub.com/domoritz/leaflet-locatecontrol/gh-pages/dist/L.Control.Locate.min.css" />
+
+</head>
+
+<style>
+.leaflet-control-locate {
+  border:1px solid rgba(0,0,0,0.4);
+  }
+.leaflet-control-locate a {
+  background-color:#fff;
+  background-position:-3px, -2px;
+  }
+.leaflet-control-locate.active a {
+  background-position:-33px -2px;
+  }
+</style>
+
+<style>
+    #map { height: 800px;
+              width: 800px;
+
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+    .info h4 {
+      margin: 0 0 5px;
+      color: #777;
+    }
+
+    .legend {
+      text-align: left;
+      line-height: 18px;
+      color: #555;
+    }
+    .legend i {
+      width: 90px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.6;
+    }
+
+      svg {
+        position: relative;
+      }
+
+      path {
+        /*fill: #000;*/
+        fill-opacity: .5;
+        stroke: #fff;
+        stroke-width: 1.5px;
+      }
+
+      path:hover {
+        fill: brown;
+        fill-opacity: .7;
+        /*stroke: #000000;*/
+        /*stroke-width: 2.5px !important;*/
+      }
+
+</style>
+<body>
+ <div id="map"></div>
+ <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+ <script src="http://d3js.org/d3.v3.min.js"></script>
+ <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="Leaflet.Coordinates-master/src/Control.Coordinates.js"></script>
+
+ <script>
+	var map = L.map('map').setView([40.780, -73.935], 12);
+
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+	    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+	    maxZoom: 14,
+	    id: 'jessfreaner.7bbf169c',
+	    accessToken: 'pk.eyJ1IjoiamVzc2ZyZWFuZXIiLCJhIjoiNTVlMzNjMzU2NGEyNTVkOGVmYjZhZjAzMGFmYjdhYTkifQ.5hofoddvcmlemUAInmDcBA'
+	}).addTo(map);
+
+	var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+	    g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+	// var avgPriceSqFt = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution}),
+ //    avgSales  = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution}),
+ //    medianSales  = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution}),
+ //    avgSqFt = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution});
+  
+ //  var baseLayers = {
+ //      "avgPriceSqFt": avgPriceSqFt,
+ //      "avgSales": avgSales,
+ //      "medianSales": medianSales,
+ //      "avgSqFt": avgSqFt
+ //    };
+  
+ //  var overlays = {
+ //      // "Cities": cities
+ //    };
+
+
+ //  L.control.layers(baseLayers, overlays).addTo(map);
+  
+  var menu = L.control({position: 'topright'});
+  
+  menu.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'info menu');
+    div.innerHTML = '<select><option>avgPriceSqFt</option><option>avgSales</option><option>medianSales</option><option>avgSqFt</option></select>';
+    div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation;
+    console.log(div)
+    return div;
+  };
+
+  menu.addTo(map);
+
+  d3.json("pv_by_zip.json", function(error,collection) {
+	// d3.json("response.json", function(error,collection) {
+  // code here
+  		if (error) return console.error(error);
+  		// console.log(collection);
+
+    	var transform = d3.geo.transform({point: projectPoint}),
+      		path = d3.geo.path().projection(transform);
+
+  		var feature = g.selectAll("path")
+      		.data(collection.features)
+    	  .enter().append("path");
+
+  		map.on("viewreset", reset);
+  		reset();
+
+  // Reposition the SVG to cover the features.
+  function reset() {
+    var bounds = path.bounds(collection),
+        topLeft = bounds[0],
+        bottomRight = bounds[1];
+
+        // console.log(bounds)
+
+    svg .attr("width", bottomRight[0] - topLeft[0])
+        .attr("height", bottomRight[1] - topLeft[1])
+        .style("left", topLeft[0] + "px")
+        .style("top", topLeft[1] + "px");
+
+    g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+
+    feature.attr("d", path);
+  }
+  // Use Leaflet to implement a D3 geometric transformation.
+  function projectPoint(x, y) {
+    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+    this.stream.point(point.x, point.y);
+  }
+  
+  // control that shows state info on hover
+
+  var info = L.control();
+
+  info.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+      this.update();
+      return this._div;
+  };
+
+  // method that we will use to update the control based on feature properties passed
+  info.update = function (props) {
+      console.log('props',props)
+      this._div.innerHTML = '<h4>Manhattan: Avg Price / Sq Ft</h4>' +  (props ?
+          '<b>' + props.Neighborhood + ': ' + props.Zip_Code +
+           '</b><br />$'
+          + props.Avg_Price_SqFt + ' / sq ft<sup>2</sup>'
+          : 'Hover over a zip code');
+  };
+
+  info.addTo(map);
+
+
+  // colors from ColorBrewer; Color based on property value
+  function getColor(d) {
+  // console.log(d)
+	    return d > 1500 ? '#006837' :
+	           d > 1400  ? '#1a9850' :
+	           d > 1300  ? '#66bd63' :
+	           d > 1200  ? '#a6d96a' :
+	           d > 1100   ? '#d9ef8b' :
+	           d > 1000  ? '#ffffbf' :
+	           d > 900   ? '#fee08b' :
+             d > 800   ? '#fdae61' :
+             d > 700   ? '#f46d43' :
+             d > 600   ? '#d73027' :
+             d > 500   ? '#a50026' :
+                          '#a50026';
+
+	                      // '#FFEDA0';
+
+  }
+
+  // ["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#ffffbf","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]
+// #f7fcfd
+// #e5f5f9
+// #ccece6
+// #99d8c9
+// #66c2a4
+// #41ae76
+// #238b45
+// #005824
+
+  function style(feature) {
+      // console.log(feature.properties)
+      var pv = feature.properties.PropValues
+      if (pv ) {
+        // console.log(feature.properties.PropValues.Avg_Price_SqFt)
+        // console.log(getColor(feature.properties.PropValues.Avg_Price_SqFt))
+      return {
+          fillColor: getColor(feature.properties.PropValues.Avg_Price_SqFt),
+          weight: 2,
+          opacity: 1,
+          color: 'white',
+          dashArray: '3',
+          fillOpacity: .4
+      }}
+      else {
+        // If value is undefined...
+        return "#ccc";
+      };
+  }
+
+  function highlightFeature(e) {
+      var layer = e.target;
+
+      layer.setStyle({
+        weight: 5,
+        color: '#000000',
+        dashArray: '',
+        fillOpacity: 0.7
+        // stroke: #000000,
+        // stroke-width: 2.5px !important
+      });
+
+      if (!L.Browser.ie && !L.Browser.opera) {
+        layer.bringToFront();
+      }
+      // console.log('test',layer.feature.properties.PropValues.Avg_Price_SqFt)
+      info.update(layer.feature.properties.PropValues);
+    }
+
+  var geojson;
+
+    function resetHighlight(e) {
+      geojson.resetStyle(e.target);
+      info.update();
+    }
+
+    function zoomToFeature(e) {
+      map.fitBounds(e.target.getBounds());
+    }
+
+    function onEachFeature(feature, layer) {
+      layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+      });
+    }
+
+    geojson = L.geoJson(collection, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+  // L.geoJson(collection, {style: style}).addTo(map);
+  map.attributionControl.addAttribution('Real Estate data &copy; <a href="http://realestate.nytimes.com/community/manhattanMarketData.aspx">NY Times</a>');
+
+  var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+
+      var div = L.DomUtil.create('div', 'info legend'),
+        values = [500, 600, 700, 800, 900, 
+        1000, 1100, 1200, 1300, 1400, 1500],
+        labels = [],
+        from, to;
+
+      for (var i = 0; i < values.length; i++) {
+        from = values[i];
+        to = values[i + 1];
+
+        labels.push(
+          '<i style="background:' + getColor(from + 1) + '"></i> $ ' +
+          from + (to ? ' &ndash; ' + to : '+'));
+                  opacity: .7
+
+      }
+
+      div.innerHTML = labels.join('<br>');
+      return div;
+    };
+
+    legend.addTo(map);
+
+  });
+
+
+
+ </script>
+
+
+
+</body>

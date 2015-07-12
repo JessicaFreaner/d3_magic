@@ -1,7 +1,3 @@
-// copyright vida.io 2013
-// source code license: BSD
-// d3js library is from Mike Bostock
-
 /*--- IMPORTANT GUIDELINES --- 
 1. Use div #canvas-svg for svg rendering
     var svg = d3.select("#canvas-svg");

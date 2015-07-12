@@ -1,9 +1,5 @@
 /*
-
-Copyright vida.io 2013
-License: BSD
-d3js is from Mike Bostock
-
+d3js
 */
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
@@ -56,10 +52,8 @@ h1{
 
 #state-select {
   position: absolute;
-  top: 320px;
+  top: 300px;
   left: 150px;
-  margin-top: 10px;
-
 }
 
 #twenty-seven {
