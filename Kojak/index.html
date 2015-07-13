@@ -1,0 +1,582 @@
+<!-- COMMANDS TO LAUNCH:
+TERMINAL:     python -m SimpleHTTPServer
+WEB BROWSER:  http://localhost:8000/nyc_nta_map.html
+ -->
+
+<!-- 
+CONVERT SHAPEFILE to Intermediary GeoJSON
+ogr2ogr \
+  -f GeoJSON \
+  map_nynta.json \
+  nynta.shp
+ -->
+
+<!-- CONVERT GeoJSON to TopoJSON
+ topojson \
+  -o nyc_stations_med_pv_topo_nta.json \
+  --id-property NTACode \
+  --properties name=NTAName \
+  --properties stations=Stations \
+  --properties prop_values=PropValues \
+  --properties adj_prop_values=AdjPropValues \
+  -- \
+  nyc_stations_med_prop_val_nta_data.geojson
+ -->
+
+
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title> GENTRIFICATION </title>
+</head>
+
+<header>
+  <h1>Visualizing Residential Property Values & MTA Traffic in NYC</h1>
+  <p>by Jessica Freaner</p>
+</header>
+<div>
+<form>
+  <select id="opts" onchange="redraw()"> 
+    <option value="2011">2011</option>
+    <option value="2012">2012</option>
+    <option value="2013">2013</option>
+    <option value="2014">2014</option>
+  </select>
+</form>
+<form>
+  <select id="opts1" onchange="redraw()">
+    <option value="Adj">Adjusted for Inflation</option>
+    <option value="NoAdj">Not Adjusted for Inflation</option>
+  </select>
+</form>
+<form>
+  <select id="opts2" onchange="redraw()">
+    <option value="Sun_Brunch">Sun Brunch</option>
+    <option value="Sat_Brunch">Sat Brunch</option>
+    <option value="Fri_Nite">Fri Nite</option>
+    <option value="Sat_Nite">Sat Nite</option>
+
+  </select>
+</form>
+</div>
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #3f435f;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1em;
+  background-image: url("/images/background.jpg");
+  letter-spacing: .7px;
+}
+
+form {
+  margin-left: 10px;
+}
+
+#all {
+  width: 15%;
+  height:15%;
+  position: absolute;
+  left:40%;
+  bottom:0;
+  top:40%;
+  right:0;
+}
+
+#arrow {
+  font-size: 30px;
+}
+
+#arrow2 {
+  font-size: 30px;
+}
+
+svg {
+  font: 10px sans-serif;
+}
+
+/* CSS goes here. */
+header h1 {
+  padding-left: 30px;
+  margin-bottom: 0px;
+}
+
+header p {
+  color: #878cb0;
+  padding-left: 30px;
+  margin-top: 0px;
+}
+
+h1 {
+  color: #FFF;
+  font-weight: 100;
+}
+.caption {
+  font-weight: bold;
+}
+
+.key path {
+  display: none;
+}
+
+.key line {
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.nta-boundary {
+  fill: none;
+  stroke: #777;
+  stroke-dasharray: 2,2;
+  stroke-linejoin: round;
+}
+.wrapper {
+     width: 800px;
+     margin-left: auto;
+     margin-right: auto;
+     margin-bottom: 0px;
+   }
+
+#area1 {
+  width: 50%;
+  float: left;
+}
+
+#area2 {
+  width: 50%;
+  float: right;
+}
+
+path {
+  stroke:white;
+  stroke-width: 1px;
+}
+
+.neighborhood {
+  fill: none;
+  pointer-events: none;
+  stroke: purple;
+  stroke-width: 2;
+}
+
+.park {
+  fill: #E1EDE2;
+  pointer-events: none;
+}
+
+.legend {
+ font-size: 12px;
+}
+
+#tooltip {
+  position: absolute;
+  width: 150px;
+  height: auto;
+  padding: 10px;
+  background-color: white;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+#tooltip.hidden {
+  display: none;
+}
+
+#tooltip p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 18px;
+  line-height: 15px;
+}
+
+#tooltip2 {
+  position: absolute;
+  width: 150px;
+  height: auto;
+  padding: 10px;
+  background-color: white;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+#tooltip2.hidden {
+  display: none;
+}
+
+#tooltip2 p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 18px;
+  line-height: 15px;
+}
+</style></div>
+<div></div>
+</style>
+
+<body>
+<div id="all">
+</div>
+<div id="area1">
+</div>
+<div id="area2">
+</div>
+
+
+<div id="tooltip" class="hidden">
+        <p><strong><span id="neighborhood">Neighborhood</span></strong></p>
+        <br />
+        <p><span id="arrow"></span>&nbsp;&nbsp;<span id="value">description</span></p>
+</div>
+<div id="tooltip2" class="hidden">
+        <p><strong><span id="neighborhood2">Neighborhood</span></strong></p>
+        <br />
+        <p><span id="arrow2"></span>&nbsp;&nbsp;<span id="value2">description</span></p>
+</div>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+<script src="http://code.jquery.com/jquery.js"></script>
+<script src="http://fgnass.github.io/spin.js/spin.min.js"></script>
+<script>
+
+/* JavaScript goes here. */
+var margin = {top: 0, right: 0, bottom: 80, left:   0},
+    width = 800 - margin.left - margin.right,
+    height = 10000 - margin.top - margin.bottom;
+
+var width = 820,
+    height = 1000;
+
+// var color_pv = d3.scale.threshold()
+//     .domain([.02, .04, .06, .08, .10])
+//     .range(["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8", "#756bb1", "#54278f"]);
+
+//var colors_pv = d3.scale.quantize()
+var colors_pv = d3.scale.linear()
+    // .domain([500000,1000000,2000000, 3000000,4000000]) // absolute values
+    // .domain([-.06,-.03,.00,.03,.06]) // percent diff
+    .domain([-.10, .00,.04,.06,.20, .60]) // percent diff
+    // .range(colorbrewer.Greens[8]);
+    // .range(["rgb(237,248,233)", 
+      .range([
+             "rgb(181,40,40)",  //red
+             //"rgb(255,102,102)", //red
+             //"rgb(255,255,255)", // white
+             "rgb(200,200,150)",
+             // "rgb(229,252,232)",
+             //"rgb(186,228,179)",
+             "rgb(116,196,118)", 
+             "rgb(49,163,84)",
+             "rgb(0,109,44)",
+             "rgb(0,129,05)"
+             ]);
+
+//var colors_mta = d3.scale.quantize()
+var colors_mta = d3.scale.linear()
+    // .domain([500000,1000000,2000000, 3000000,4000000]) // absolute values
+    // .domain([-.06,-.03,.00,.03,.06]) // percent diff
+    .domain([-.10, 00, .02,.04,.06,.20]) // percent diff
+    // .range(colorbrewer.Greens[8]);
+    // .range(["rgb(237,248,233)", 
+      .range([
+             "rgb(0,0,0)", // black
+             "rgb(56,56,56)",
+             "rgb(104,104,104)", 
+             "rgb(152,152,152)",
+             "rgb(200,200,200)"
+             ]);
+
+var div1 = d3.select("text").append("div")   
+  .attr("class", "tooltip")               
+  .style("opacity", 0);
+  
+var div2 = d3.select("text").append("div")   
+  .attr("class", "tooltip")               
+  .style("opacity", 0);
+
+var svg = d3.select("#area1").append("svg")
+    .attr("width", width )
+    .attr("height", height)
+  .append("g");
+
+var svg2 = d3.select("#area2").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g");
+
+var opts = {
+  lines: 13, // The number of lines to draw
+  length: 20, // The length of each line
+  width: 10, // The line thickness
+  radius: 30, // The radius of the inner circle
+  corners: 1, // Corner roundness (0..1)
+  rotate: 0, // The rotation offset
+  direction: 1, // 1: clockwise, -1: counterclockwise
+  color: '#000', // #rgb or #rrggbb or array of colors
+  speed: 1, // Rounds per second
+  trail: 60, // Afterglow percentage
+  shadow: false, // Whether to render a shadow
+  hwaccel: false, // Whether to use hardware acceleration
+  className: 'spinner', // The CSS class to assign to the spinner
+  zIndex: 2e9, // The z-index (defaults to 2000000000)
+  top: '50%', // Top position relative to parent
+  left: '50%' // Left position relative to parent
+};
+
+var target = document.getElementById("all");
+var spinner = new Spinner(opts).spin(target);
+
+var uparrow = "\u2B06";
+var downarrow = "\u2B07";
+
+var projection1 = d3.geo.mercator()
+                       .center([-74.03, 40.78])
+                       .scale(70000)
+                       .translate([(width) / 3 +30, (height)/3 - 50]);
+
+var projection2 = d3.geo.mercator()
+                       .center([-74.03, 40.78])
+                       .scale(70000)
+                       .translate([(width) / 3 +30, (height)/3 - 50]);
+
+var path = d3.geo.path()
+    .projection(projection1);
+
+var path2 = d3.geo.path()
+    .projection(projection2);
+
+
+function redraw(){
+
+spinner.spin(target);
+
+d3.json("nyc_stations_med_pv_topo_nta.json", function(error, nta) {   
+
+  if (error) return console.error(error);
+
+  	svg.selectAll(".nta")
+	    .data(topojson.feature(nta, nta.objects.nyc_stations_med_prop_val_nta_data).features)
+	  .enter().append("path")
+	    .attr("class", function(d) { return "nta " + d.id; })
+	    .attr("d", path);
+  		
+    svg2.selectAll(".nta")
+      .data(topojson.feature(nta, nta.objects.nyc_stations_med_prop_val_nta_data).features)
+    .enter().append("path")
+      .attr("class", function(d) { return "nta " + d.id; })
+      .attr("d", path2);
+
+    $(".nta.path").empty();
+
+    svg.selectAll(".nta.path")
+     .data(topojson.feature(nta, nta.objects.nyc_stations_med_prop_val_nta_data).features)
+     .enter()
+     .append("path")
+     .attr("d", path)
+     .style("fill", function(d) {
+
+                  var name = d.properties.name;
+                  //Get data value
+                  var pv = d.properties.prop_values;
+                  var adj_pv = d.properties["adj_prop_values"];
+
+                  var thisyear = $("#opts").val();
+                  var lastyear = thisyear -1;
+
+                  var adj = $("#opts1").val();
+
+                  if (pv) {
+                    // If value exists
+                    if (adj == "Adj" && adj_pv){
+                      percent_diff = ( adj_pv["adj_"+thisyear] - adj_pv["adj_"+lastyear] ) / adj_pv["adj_"+lastyear]
+
+                    }
+                    else {
+                    percent_diff = ( pv["yr_"+thisyear] - pv["yr_"+lastyear] ) / pv["yr_"+lastyear]
+                  }
+                    return colors_pv(percent_diff);
+                  } else {
+                    // If value is undefined...
+                    return "#ccc";
+                  }
+                })
+    //Adding mouseevents
+    .on("mouseover", function(d) {
+      
+      d3.select("#tooltip")
+      .style("top", (d3.event.pageY -100) + "px")
+      .style("left", (d3.event.pageX) + "px")
+      .classed("hidden", false);
+      
+      var thisyear = $("#opts").val();  
+      var lastyear = thisyear -1;
+      var adj_pv = d.properties["adj_prop_values"];
+      var adj = $("#opts1").val();
+
+      if (d.properties.prop_values){
+        if (adj == "Adj" && adj_pv){
+          pct_diff = ( adj_pv["adj_"+thisyear] - adj_pv["adj_"+lastyear] ) / adj_pv["adj_"+lastyear]
+
+        }
+
+        else {
+        var pct_diff = (d.properties.prop_values["yr_" + thisyear] - d.properties.prop_values["yr_" + lastyear] ) /  d.properties.prop_values["yr_" + lastyear];
+      }
+        }
+      else {
+        var pct_diff = null;
+      }
+      $("#neighborhood").text(d.properties.name);
+      $("#value").text( (pct_diff * 100).toFixed() + '%' ) ;
+      if (pct_diff  > 0 ) {
+        $("#arrow").text(uparrow);
+      }
+      else if ( pct_diff === null){
+        $("#value").text("-");
+        $("#arrow").text("-");
+      }
+      else {
+       $("#arrow").text(downarrow); 
+      }
+      d3.select("#arrow").style("color", colors_pv(pct_diff))
+
+  d3.select("#tooltip2")
+      .style("top", (d3.event.pageY -100) + "px")
+      .style("left", (d3.event.pageX + 800) + "px")
+      .classed("hidden", false);
+
+      var thisyear = $("#opts").val();  
+      var lastyear = thisyear -1;
+      var adj_pv = d.properties["adj_prop_values"];
+      var adj = $("#opts1").val();
+
+      if (d.properties.prop_values){
+        if ( adj == "Adj" && adj_pv) {
+        var pct_diff = (d.properties.adj_prop_values["adj_" + thisyear] - d.properties.adj_prop_values["adj_" + lastyear] ) /  d.properties.adj_prop_values["adj_" + lastyear];
+      }
+      else {
+      var pct_diff = (d.properties.prop_values["yr_" + thisyear] - d.properties.prop_values["yr_" + lastyear] ) /  d.properties.prop_values["yr_" + lastyear];
+      }
+        }
+      else {
+        var pct_diff = null;
+      }
+      $("#neighborhood2").text(d.properties.name);
+      $("#value2").text( (pct_diff * 100).toFixed() + '%' ) ;
+      if (pct_diff  > 0 ) {
+        $("#arrow2").text(uparrow);
+      }
+      else if ( pct_diff === null){
+        $("#value2").text("-");
+        $("#arrow2").text("-");
+      }
+      else {
+       $("#arrow2").text(downarrow); 
+      }
+      d3.select("#arrow2").style("color", colors_pv(pct_diff))
+
+    })
+
+    .on("mouseout", function() {
+          //Hide the tooltip
+          d3.select("#tooltip").classed("hidden", true);
+          d3.select("#tooltip2").classed("hidden", true);
+
+          })
+     ;
+
+
+    svg2.selectAll(".nta.path")
+     .data(topojson.feature(nta, nta.objects.nyc_stations_med_prop_val_nta_data).features)
+     .enter()
+     .append("path")
+     .attr("d", path2)
+     .style("fill", function(d) {
+
+
+                  //Get data value
+                  var pv = d.properties.prop_values;
+
+                  if (pv) {
+                    // If value exists
+                    // return colors_pv(pv.yr_2014);
+                    percent_diff = ( pv.yr_2014 - pv.yr_2013 ) / pv.yr_2013
+                    // percent_diff = ( pv.yr_2011 - pv.yr_2010 ) / pv.yr_2010
+                    return colors_mta(percent_diff);
+                  } else {
+                    // If value is undefined...
+                    return "#ccc";
+                  }
+                })
+                  //Adding mouseevents
+    .on("mouseover", function(d) {
+      d3.select(this).transition().duration(300).style("opacity", 1);
+                d3.select("#tooltip").classed("hidden", false);
+
+      div2.transition().duration(300)
+
+      .style("left", (d3.event.pageX) + "px")
+      .style("top", (d3.event.pageY -30) + "px");
+
+    })
+
+    .on("mouseout", function() {
+          d3.select("#tooltip").classed("hidden", true);
+
+          })
+     ;
+    
+    $("circle").remove();
+
+    var features = topojson.feature(nta, nta.objects.nyc_stations_med_prop_val_nta_data).features;
+    all_stations = features.reduce(function(prev, current, index, array){
+      if (current.properties.stations) {
+       return prev.concat(current.properties.stations);
+     } else {
+      return prev;
+    }
+    }, initialValue = []);
+    svg2.selectAll("circle")
+     .data(all_stations)
+     .enter()
+           .append("circle")
+
+           .attr("cx", function(d) {
+                    return projection2([d.lng,d.lat])[0];
+           })
+           .attr("cy", function(d) {
+                    return projection2([d.lng,d.lat])[1];
+           })
+           .attr("r", 3)
+           .style("fill", "yellow")
+           .style("opacity", function(d,i) {
+            if (d) {
+              return 0.5;
+            }
+            else {
+              return 0;
+            };
+           });
+
+spinner.stop();
+}
+);
+
+
+} //end of redraw
+
+redraw();
+
+</script>
