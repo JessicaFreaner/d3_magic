@@ -1,42 +1,58 @@
-<!-- topojson \
-  -o pv_by_zip.json \
-  --id-property zipCode \
-  -- \
-  manh_pv_2015_Q2.json \
-  response.json -->
-
-
 <!DOCTYPE html>
 <head>
   	<title>Example</title>
-	<meta charset="utf-8" />
+    <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
- 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
   <link rel="stylesheet" href="http://rawgithub.com/domoritz/leaflet-locatecontrol/gh-pages/dist/L.Control.Locate.min.css" />
+  <link rel="stylesheet" href="animate.css">
+
 
 </head>
+<div class="col-md-12 animated fadeIn">
+<header>
+  <h1>Manhattan Real Estate by Zip Code</h1>
+</header>
+</div>
+<hr>
+
+<div >
+<form>
+  <select id="opts" onchange="redraw()"> 
+    <option value="Avg_Price_SqFt">Avg Price Per Sq Ft</option>
+    <option value="Avg_Price">Avg Sales Price</option>
+    <option value="Median_Price">Median Sales Price</option>
+    <option value="Avg_SqFt">Avg Sq Ft</option>
+  </select>
+</form>
+</div>
 
 <style>
-.leaflet-control-locate {
-  border:1px solid rgba(0,0,0,0.4);
-  }
-.leaflet-control-locate a {
-  background-color:#fff;
-  background-position:-3px, -2px;
-  }
-.leaflet-control-locate.active a {
-  background-position:-33px -2px;
-  }
-</style>
-
-<style>
-    #map { height: 800px;
-              width: 800px;
+    body {
+      font-family: "Open Sans", Helvetica, Arial, sans-serif;
+      width: 800px;
+      height: 500px;
+      position: relative;
+      margin-left: 20px;
+    }
+    h1{
+      color: #34495e;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
 
     }
+    form {
+          /*margin-right: 30px;*/
+          margin-left: 30px;
+          margin-bottom: 10px;
+          text-align: left;
+    }
 
+    #map { height: 800px;
+              width: 800px;
+    }
+    
     .info {
       padding: 6px 8px;
       font: 14px/16px Arial, Helvetica, sans-serif;
@@ -50,13 +66,17 @@
       color: #777;
     }
 
+    #opts {
+      margin-top: 
+    }
+
     .legend {
-      text-align: left;
-      line-height: 18px;
+      text-align: center;
+      line-height: 20px;
       color: #555;
     }
     .legend i {
-      width: 90px;
+      width: 150px;
       height: 18px;
       float: left;
       margin-right: 8px;
@@ -68,8 +88,7 @@
       }
 
       path {
-        /*fill: #000;*/
-        fill-opacity: .5;
+        fill-opacity: .6;
         stroke: #fff;
         stroke-width: 1.5px;
       }
@@ -77,8 +96,8 @@
       path:hover {
         fill: brown;
         fill-opacity: .7;
-        /*stroke: #000000;*/
-        /*stroke-width: 2.5px !important;*/
+        stroke: #000000;
+        stroke-width: 2.5px !important;
       }
 
 </style>
@@ -87,8 +106,7 @@
  <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
  <script src="http://d3js.org/d3.v3.min.js"></script>
  <script src="http://d3js.org/topojson.v1.min.js"></script>
-<script src="Leaflet.Coordinates-master/src/Control.Coordinates.js"></script>
-
+ <script src="http://code.jquery.com/jquery.js"></script>
  <script>
 	var map = L.map('map').setView([40.780, -73.935], 12);
 
@@ -102,42 +120,11 @@
 	var svg = d3.select(map.getPanes().overlayPane).append("svg"),
 	    g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-	// var avgPriceSqFt = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution}),
- //    avgSales  = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution}),
- //    medianSales  = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution}),
- //    avgSqFt = L.tileLayer(mapboxUrl, {id: 'MapID', attribution: mapboxAttribution});
-  
- //  var baseLayers = {
- //      "avgPriceSqFt": avgPriceSqFt,
- //      "avgSales": avgSales,
- //      "medianSales": medianSales,
- //      "avgSqFt": avgSqFt
- //    };
-  
- //  var overlays = {
- //      // "Cities": cities
- //    };
-
-
- //  L.control.layers(baseLayers, overlays).addTo(map);
-  
-  var menu = L.control({position: 'topright'});
-  
-  menu.onAdd = function (map) {
-    var div = L.DomUtil.create('div', 'info menu');
-    div.innerHTML = '<select><option>avgPriceSqFt</option><option>avgSales</option><option>medianSales</option><option>avgSqFt</option></select>';
-    div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation;
-    console.log(div)
-    return div;
-  };
-
-  menu.addTo(map);
+  function redraw(){
 
   d3.json("pv_by_zip.json", function(error,collection) {
-	// d3.json("response.json", function(error,collection) {
-  // code here
+
   		if (error) return console.error(error);
-  		// console.log(collection);
 
     	var transform = d3.geo.transform({point: projectPoint}),
       		path = d3.geo.path().projection(transform);
@@ -155,8 +142,6 @@
         topLeft = bounds[0],
         bottomRight = bounds[1];
 
-        // console.log(bounds)
-
     svg .attr("width", bottomRight[0] - topLeft[0])
         .attr("height", bottomRight[1] - topLeft[1])
         .style("left", topLeft[0] + "px")
@@ -172,10 +157,15 @@
     var point = map.latLngToLayerPoint(new L.LatLng(y, x));
     this.stream.point(point.x, point.y);
   }
-  
-  // control that shows state info on hover
 
+  // control that shows zip code info on hover
   var info = L.control();
+  
+  // clear old data off map
+  d3.selectAll('.info.leaflet-control')
+       .remove();
+  d3.selectAll('path')
+       .remove();
 
   info.onAdd = function (map) {
       this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
@@ -185,20 +175,39 @@
 
   // method that we will use to update the control based on feature properties passed
   info.update = function (props) {
-      console.log('props',props)
+      // choose metric to color map
+      var metric = $("#opts").val();
+      if (metric == 'Avg_Price_SqFt') {
       this._div.innerHTML = '<h4>Manhattan: Avg Price / Sq Ft</h4>' +  (props ?
           '<b>' + props.Neighborhood + ': ' + props.Zip_Code +
            '</b><br />$'
-          + props.Avg_Price_SqFt + ' / sq ft<sup>2</sup>'
+          + props.Avg_Price_SqFt.toFixed().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + ' / sq ft<sup>2</sup>'
           : 'Hover over a zip code');
+    } else if (metric == 'Avg_Price') {
+      this._div.innerHTML = '<h4>Manhattan: Average Price </h4>' +  (props ?
+          '<b>' + props.Neighborhood + ': ' + props.Zip_Code +
+           '</b><br />$'
+          + props.Avg_Sales_Price.toFixed().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")  + ''
+          : 'Hover over a zip code');
+    } else if (metric == 'Median_Price') {
+      this._div.innerHTML = '<h4>Manhattan: Median Price </h4>' +  (props ?
+          '<b>' + props.Neighborhood + ': ' + props.Zip_Code +
+           '</b><br />$'
+          + props.Median_Sales_Price.toFixed().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + ''
+          : 'Hover over a zip code');
+    } else if (metric == 'Avg_SqFt') {
+      this._div.innerHTML = '<h4>Manhattan: Average Sq Ft </h4>' +  (props ?
+          '<b>' + props.Neighborhood + ': ' + props.Zip_Code +
+           '</b><br />'
+          + props.Avg_SqFt.toFixed().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "1,") + ' sq ft<sup>2</sup>'
+          : 'Hover over a zip code');
+    }
   };
-
   info.addTo(map);
 
 
   // colors from ColorBrewer; Color based on property value
   function getColor(d) {
-  // console.log(d)
 	    return d > 1500 ? '#006837' :
 	           d > 1400  ? '#1a9850' :
 	           d > 1300  ? '#66bd63' :
@@ -211,35 +220,81 @@
              d > 600   ? '#d73027' :
              d > 500   ? '#a50026' :
                           '#a50026';
-
-	                      // '#FFEDA0';
-
   }
 
-  // ["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#ffffbf","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]
-// #f7fcfd
-// #e5f5f9
-// #ccece6
-// #99d8c9
-// #66c2a4
-// #41ae76
-// #238b45
-// #005824
+  function getColor1(d) {
+      return d > 2500000 ? '#006837' :
+             d > 2250000  ? '#1a9850' :
+             d > 2000000  ? '#66bd63' :
+             d > 1750000  ? '#a6d96a' :
+             d > 1500000  ? '#d9ef8b' :
+             d > 1250000  ? '#ffffbf' :
+             d > 1000000   ? '#fee08b' :
+             d > 750000   ? '#fdae61' :
+             d > 500000   ? '#f46d43' :
+             d > 250000   ? '#d73027' :
+             d > 100000   ? '#a50026' :
+                          '#a50026';
+  } 
 
+  function getColor2(d) {
+      return d > 1500000  ? '#005a32' :
+             d > 1300000  ? '#238443' :
+             d > 1100000  ? '#41ab5d' :
+             d > 900000  ? '#78c679' :
+             d > 700000   ? '#addd8e' :
+             d > 500000   ? '#d9f0a3' :
+             d > 300000   ? '#f7fcb9' :
+             d > 100000   ? '#ffffe5' :
+                           '#ffffe5';
+  } 
+
+  function getColor3(d) {
+      return d > 1700 ? '#006837' :
+             d > 1600  ? '#1a9850' :
+             d > 1500  ? '#66bd63' :
+             d > 1400  ? '#a6d96a' :
+             d > 1300   ? '#d9ef8b' :
+             d > 1200  ? '#ffffbf' :
+             d > 1100   ? '#fee08b' :
+             d > 1000   ? '#fdae61' :
+             d > 900   ? '#f46d43' :
+             d > 800   ? '#d73027' :
+             d > 700   ? '#a50026' :
+                          '#a50026';
+  }
   function style(feature) {
-      // console.log(feature.properties)
       var pv = feature.properties.PropValues
       if (pv ) {
-        // console.log(feature.properties.PropValues.Avg_Price_SqFt)
-        // console.log(getColor(feature.properties.PropValues.Avg_Price_SqFt))
-      return {
-          fillColor: getColor(feature.properties.PropValues.Avg_Price_SqFt),
-          weight: 2,
-          opacity: 1,
-          color: 'white',
-          dashArray: '3',
-          fillOpacity: .4
-      }}
+          var metric = $("#opts").val();
+      
+          if (metric == 'Avg_Price_SqFt') {
+            var feature = feature.properties.PropValues.Avg_Price_SqFt;
+            var color = getColor(feature);
+          }
+          else if (metric == 'Avg_Price') {
+            var feature = feature.properties.PropValues.Avg_Sales_Price;
+            var color = getColor1(feature);
+          }
+          else if (metric == 'Median_Price') {
+            var feature = feature.properties.PropValues.Median_Sales_Price; 
+            var color = getColor1(feature);
+
+          }
+          else if (metric == 'Avg_SqFt') {
+            var feature = feature.properties.PropValues.Avg_SqFt; 
+            var color = getColor3(feature);
+
+          }
+            return {
+              fillColor: color,
+              weight: 2,
+              opacity: 1,
+              color: 'white',
+              dashArray: '3',
+              fillOpacity: .7
+            } 
+          } 
       else {
         // If value is undefined...
         return "#ccc";
@@ -261,7 +316,6 @@
       if (!L.Browser.ie && !L.Browser.opera) {
         layer.bringToFront();
       }
-      // console.log('test',layer.feature.properties.PropValues.Avg_Price_SqFt)
       info.update(layer.feature.properties.PropValues);
     }
 
@@ -283,13 +337,16 @@
         click: zoomToFeature
       });
     }
-
+    // geojson = L.geoJson(collection, {
+    //   style: none
+    //   // onEachFeature: onEachFeature
+    // }).addTo(map);
+    
     geojson = L.geoJson(collection, {
       style: style,
       onEachFeature: onEachFeature
     }).addTo(map);
 
-  // L.geoJson(collection, {style: style}).addTo(map);
   map.attributionControl.addAttribution('Real Estate data &copy; <a href="http://realestate.nytimes.com/community/manhattanMarketData.aspx">NY Times</a>');
 
   var legend = L.control({position: 'bottomright'});
@@ -297,21 +354,54 @@
     legend.onAdd = function (map) {
 
       var div = L.DomUtil.create('div', 'info legend'),
-        values = [500, 600, 700, 800, 900, 
+        sqft_price_values = [500, 600, 700, 800, 900, 
         1000, 1100, 1200, 1300, 1400, 1500],
+        avg_values = [100000, 250000, 500000, 750000, 1000000,
+        1250000, 1500000, 1750000, 2100000, 2250000, 2500000],
+        // median_values = [100000, 300000, 500000, 700000,
+        // 900000, 1100000, 1300000, 1500000],
+        sqft_values = [700, 800, 900, 1000, 1100, 
+        1200, 1300, 1400, 1500, 1600, 1700],
         labels = [],
         from, to;
 
-      for (var i = 0; i < values.length; i++) {
-        from = values[i];
-        to = values[i + 1];
-
+      var metric = $("#opts").val();
+      if (metric == 'Avg_Price_SqFt'){
+      for (var i = 0; i < sqft_price_values.length; i++) {
+        from = sqft_price_values[i];
+        to = sqft_price_values[i + 1];
         labels.push(
           '<i style="background:' + getColor(from + 1) + '"></i> $ ' +
           from + (to ? ' &ndash; ' + to : '+'));
                   opacity: .7
 
-      }
+      }} else if (metric == 'Avg_Price'){
+      for (var i = 0; i < avg_values.length; i++) {
+        from = avg_values[i];
+        to = avg_values[i + 1];
+        labels.push(
+          '<i style="background:' + getColor1(from + 1) + '"></i> $ ' +
+          from.toFixed().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + (to ? ' &ndash; ' + to.toFixed().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") : '+'));
+                  opacity: .7
+
+      }} else if (metric == 'Median_Price'){
+      for (var i = 0; i < avg_values.length; i++) {
+        from = avg_values[i];
+        to = avg_values[i + 1];
+        labels.push(
+          '<i style="background:' + getColor1(from + 1) + '"></i> $ ' +
+          from + (to ? ' &ndash; ' + to : '+'));
+                  opacity: .7
+
+      }} else {
+      for (var i = 0; i < sqft_values.length; i++) {
+        from = sqft_values[i];
+        to = sqft_values[i + 1];
+        labels.push(
+          '<i style="background:' + getColor3(from + 1) + '"></i> ' +
+          from + (to ? ' &ndash; ' + to : '+'));
+                  opacity: .7
+      }}
 
       div.innerHTML = labels.join('<br>');
       return div;
@@ -321,6 +411,8 @@
 
   });
 
+} //end of redraw
+redraw();
 
 
  </script>

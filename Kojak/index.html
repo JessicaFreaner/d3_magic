@@ -71,7 +71,7 @@ body {
 }
 
 form {
-  margin-left: 10px;
+  margin-left: 30px;
 }
 
 #all {
@@ -93,7 +93,7 @@ form {
 }
 
 svg {
-  font: 10px sans-serif;
+  font: 10px "Open Sans", sans-serif;
 }
 
 /* CSS goes here. */
@@ -182,6 +182,7 @@ path {
   -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
   pointer-events: none;
+  /*text-align: center;*/
 }
 
 #tooltip.hidden {
@@ -190,9 +191,9 @@ path {
 
 #tooltip p {
   margin: 0;
-  font-family: sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 18px;
-  line-height: 15px;
+  line-height: 20px;
 }
 
 #tooltip2 {
@@ -216,9 +217,9 @@ path {
 
 #tooltip2 p {
   margin: 0;
-  font-family: sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 18px;
-  line-height: 15px;
+  line-height: 20px;
 }
 </style></div>
 <div></div>
@@ -439,7 +440,7 @@ d3.json("nyc_stations_med_pv_topo_nta.json", function(error, nta) {
         var pct_diff = null;
       }
       $("#neighborhood").text(d.properties.name);
-      $("#value").text( (pct_diff * 100).toFixed() + '%' ) ;
+      $("#value").text( (pct_diff * 100).toFixed() + '% Diff. from ' + (thisyear - 1) ) ;
       if (pct_diff  > 0 ) {
         $("#arrow").text(uparrow);
       }
