@@ -1,4 +1,4 @@
-# Dual Multi-Line Graph with Interactive Legend
+<!--# Dual Multi-Line Graph with Interactive Legend-->
 
 d3 visualization allows users to explore data in several ways. User can display multiple pieces of information at once on two canvases. Visualization uses tags to group lines according to Legend Key. User can hover over Legend keys to make lines appear. Clicking on the Legend prevents lines from disappearing. Legend spacing adjusts for number of keys displayed.
 
