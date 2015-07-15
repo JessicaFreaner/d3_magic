@@ -5,6 +5,6 @@ d3 visualization allows users to explore data in several ways. User can display 
 My data represents the Survival and Hazard Probabilities of Heart Health Related Life Events. 
 
 Useful for :
- - compare / contrast different visualizations
- - group multiple pieces of information across graphs
- - allowing user to remove / add data to minimize noise in visualization
++ compare / contrast different visualizations
++ group multiple pieces of information across graphs
++ allowing user to remove / add data to minimize noise in visualization
