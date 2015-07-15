@@ -6,8 +6,16 @@ Interface allows users to find information about the cost of health care plans b
 + 27-year-Old with Income < $25k
 + Family of Four with Income < $50k
 
-Useful for :
+<h4> Useful for : </h4>
 
 + selecting options in multiple ways (intuitive usage)
 + presenting multiple peices of information about a given variable at once
 + including source links
+
+Sources:
+
+[healthcare.gov](http://healthcare.gov/)
+
+[hhs.gov](http://hhs.gov/)
+
+State Exchanges
