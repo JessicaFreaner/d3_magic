@@ -11,11 +11,3 @@ Interface allows users to find information about the cost of health care plans b
 + selecting options in multiple ways (intuitive usage)
 + presenting multiple peices of information about a given variable at once
 + including source links
-
-Sources:
-
-[healthcare.gov](http://healthcare.gov/)
-
-[hhs.gov](http://hhs.gov/)
-
-State Exchanges
