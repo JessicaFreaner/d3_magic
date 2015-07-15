@@ -1,4 +1,4 @@
-<h1> Description <h1>
+<h1> Description
 
 Interface allows users to find information about the cost of health care plans by state. Tool provides the cost for the following end-users :
 
