@@ -1,7 +1,7 @@
 d3 visualization allows users to find information about the cost of health care plans by state. Tool provides the cost for the following end-users:
-+ <strong> 27-year-Old with Income > $25k</strong>
-+ <strong> 27-year-Old with Income < $25k</strong>
-+ <strong> Family of Four with Income < $50k</strong>
++ 27-year-Old with Income > $25k
++ 27-year-Old with Income < $25k
++ Family of Four with Income < $50k
 
 Useful for :
 
