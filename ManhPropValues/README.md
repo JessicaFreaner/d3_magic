@@ -9,4 +9,4 @@ Functionality:
 + Hover to see exact values for zip code in display 
 + Hightlight on hover
 + Click to zoom / re-focus
-+ Drop down menu changes to reflect metric chosem
++ Drop down menu changes to reflect metric chosen
